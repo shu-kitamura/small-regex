@@ -3,6 +3,6 @@ mod parser;
 use parser::parse;
 
 fn main() {
-    let ast = parse("abc(def|ghi)");
+    let ast = parse("a|b");
     println!("{:?}", ast)
 }

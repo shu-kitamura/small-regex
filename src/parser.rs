@@ -1,12 +1,12 @@
 //! 正規表現の式をパースするための型・関数  
 //! 式をパースして、抽象構文木(AST)に変換する。  
-//! "abc(def|ghi)"" が入力された場合、以下の AST に変換する  
+//! "ab+c*(def|ghi)"" が入力された場合、以下の AST に変換する  
 //! 
 //! ```text
 //! Seq(
 //!     Char(a),
-//!     Char(b),
-//!     Char(c),
+//!     Plus(Char(b)),
+//!     Star(Char(c)),
 //!     Or(
 //!         Seq(
 //!             Char(d),
@@ -21,8 +21,6 @@
 //!     )
 //! )
 //! ```
-
-use std::mem::take;
 
 /// AST の型
 #[derive(Debug, PartialEq)]
@@ -79,18 +77,23 @@ pub fn parse(pattern: &str) -> AST {
         if is_escape {
             is_escape = false;
             seq.push(parse_escape(c));
+            continue;
         }
         match c {
             '+' | '*' | '?' => {
                 let prev_ast: AST = seq.pop().unwrap();
                 let ast: AST = parse_qualifier(c, prev_ast);
                 seq.push(ast);
-            },
+            }
+            '|' => {
+                seq_or.push(AST::Seq(seq));
+                seq = Vec::new();
+            }
             '(' => {
-                let prev: Vec<AST> = take(&mut seq);
-                let prev_or: Vec<AST> = take(&mut seq_or);
-                stack.push((prev, prev_or));
-            },
+                stack.push((seq, seq_or));
+                seq = Vec::new();
+                seq_or = Vec::new();
+            }
             ')' => {
                 let (mut prev, prev_or) = stack.pop().unwrap();
 
@@ -102,13 +105,16 @@ pub fn parse(pattern: &str) -> AST {
                 seq = prev;
                 seq_or = prev_or;
             }
-            '|' => {
-                let prev: Vec<AST> = take(&mut seq);
-                seq_or.push(AST::Seq(prev));
-            },
             '\\' => is_escape = true,
             _ => seq.push(AST::Char(c))
         };
+
+        println!("char: {c}");
+        println!("seq: {:?}", seq);
+        println!("seq_or: {:?}", seq_or);
+        println!("stack: {:?}", stack);
+        println!("----------------------------------------------------------");
+
     }
     // 閉じカッコが足りないエラー
     if !stack.is_empty() {
@@ -118,7 +124,6 @@ pub fn parse(pattern: &str) -> AST {
     if !seq.is_empty() {
         seq_or.push(AST::Seq(seq));
     }
-
     fold_or(seq_or)
 }
 
@@ -127,9 +132,17 @@ pub fn parse(pattern: &str) -> AST {
 
 #[cfg(test)]
 mod tests {
-    use crate::parser::{AST, parse};
+    use crate::parser::{parse, AST};
 
     use super::parse_qualifier;
+
+    #[test]
+    fn test_escape() {
+        assert_eq!(
+            parse("\\*"),
+            AST::Seq(vec![AST::Char('*')])
+        );
+    }
 
     #[test]
     fn test_qualifier() {
