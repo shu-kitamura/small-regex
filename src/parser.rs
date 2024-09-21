@@ -67,11 +67,10 @@ fn fold_or(mut seq_or: Vec<AST>) -> AST {
 
 /// 式をパースし、ASTを生成
 pub fn parse(pattern: &str) -> AST {
-    let mut seq: Vec<AST> = Vec::new(); // ___
-    let mut seq_or: Vec<AST> = Vec::new(); // ___
-    let mut stack: Vec<(Vec<AST>, Vec<AST>)> = Vec::new(); // 処理中のASTを退避させる
-
-    let mut is_escape: bool = false;
+    let mut seq: Vec<AST> = Vec::new(); // 現在のコンテキスト
+    let mut seq_or: Vec<AST> = Vec::new(); // Orのコンテキスト
+    let mut stack: Vec<(Vec<AST>, Vec<AST>)> = Vec::new(); // コンテキストを一時的に退避させるスタック
+    let mut is_escape: bool = false; // エスケープ文字を処理中かどうか
 
     for c in pattern.chars() {
         if is_escape {
