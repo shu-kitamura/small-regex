@@ -107,15 +107,9 @@ pub fn parse(pattern: &str) -> AST {
             '\\' => is_escape = true,
             _ => seq.push(AST::Char(c))
         };
-
-        println!("char: {c}");
-        println!("seq: {:?}", seq);
-        println!("seq_or: {:?}", seq_or);
-        println!("stack: {:?}", stack);
-        println!("----------------------------------------------------------");
-
     }
-    // 閉じカッコが足りないエラー
+
+    // stack が空ではない = 閉じカッコが足りない
     if !stack.is_empty() {
         panic!()
     }
@@ -126,7 +120,7 @@ pub fn parse(pattern: &str) -> AST {
     fold_or(seq_or)
 }
 
-// --- test code ---
+// --- テストコード ---
 
 
 #[cfg(test)]
