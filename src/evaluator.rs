@@ -1,7 +1,7 @@
 
 use crate::compiler::Instruction;
 
-pub fn eval(instructions: &[Instruction], chars: &Vec<char>, mut p_counter: usize, mut index: usize) -> bool {
+pub fn evaluate(instructions: &[Instruction], chars: &Vec<char>, mut p_counter: usize, mut index: usize) -> bool {
     loop {
         let instruction: &Instruction = instructions.get(p_counter).unwrap();
 
@@ -18,7 +18,7 @@ pub fn eval(instructions: &[Instruction], chars: &Vec<char>, mut p_counter: usiz
             Instruction::Match => return true,
             Instruction::Jump(counter) => p_counter = *counter,
             Instruction::Split(counter1, counter2 ) => {
-                if eval(instructions, chars, *counter1, index) || eval(instructions, chars, *counter2, index) {
+                if evaluate(instructions, chars, *counter1, index) || evaluate(instructions, chars, *counter2, index) {
                     return true
                 } else {
                     return false
@@ -44,21 +44,21 @@ fn test_eval() {
     // "abc" とマッチするケース = true
     let chars1:Vec<char> = vec!['a', 'b', 'c'];
     assert_eq!(
-        eval(&insts, &chars1, 0, 0),
+        evaluate(&insts, &chars1, 0, 0),
         true
     );
 
     // "abd"とマッチするケース = true
     let chars2:Vec<char> = vec!['a', 'b', 'd'];
     assert_eq!(
-        eval(&insts, &chars2, 0, 0),
+        evaluate(&insts, &chars2, 0, 0),
         true
     );
 
     // "abx" とマッチするケース
     let chars3:Vec<char> = vec!['a', 'b', 'X'];
     assert_eq!(
-        eval(&insts, &chars3, 0, 0),
+        evaluate(&insts, &chars3, 0, 0),
         false
     );
 }
