@@ -149,10 +149,9 @@ impl Compiler {
 
         let jump_counter: usize = self.p_counter;
 
-        // カウンタをインクリメントし、split を挿入する
+        // カウンタをインクリメントし、split を挿入する。
         // 引数は、expr2 のコードの次のカウンタを指定するため、この時点では決まらない
         // ここでは仮の数値(0)を入れて。数値は後で更新する
- 
         self.p_counter += 1;
         self.instructions.push(Instruction::Jump(0));
 
